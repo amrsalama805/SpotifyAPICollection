@@ -1,0 +1,637 @@
+{
+	"info": {
+		"_postman_id": "c6a891f8-dd9e-436f-8ba6-4d60a5c1e1a9",
+		"name": "Spotify_API_Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45718116",
+		"_collection_link": "https://amr-3370658.postman.co/workspace/Route~d9fa5de1-d7ab-4efb-9fe8-b90dc44db28b/collection/45718116-c6a891f8-dd9e-436f-8ba6-4d60a5c1e1a9?action=share&source=collection_link&creator=45718116"
+	},
+	"item": [
+		{
+			"name": "[0]GetAccessToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.environment.set(\"access_token\",pm.response.json().access_token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "4d6e006ef3b64b09ba7324a596c73807",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "e0fbcc9ac91a4bfb8c911385e7a2add1",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://accounts.spotify.com/api/token",
+					"protocol": "https",
+					"host": [
+						"accounts",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"api",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[1]searchForTracksByKeyWord",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status code is 200\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							" \r",
+							"pm.test(\"track list is not empty\", function(){\r",
+							"    pm.expect(pm.response.json().tracks.items.length).to.be.above(0);\r",
+							"    \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate that track names or album titles contain love word\",function(){\r",
+							"    const json=pm.response.json();\r",
+							"    const found=json.tracks.items.some(track=>\r",
+							"    track.name.toLowerCase().includes(\"love\")||\r",
+							"    track.album.name.toLowerCase().includes(\"love\"));\r",
+							"    pm.expect(found).to.be.true;\r",
+							"    \r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/search?q=love&type=track",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "love"
+						},
+						{
+							"key": "type",
+							"value": "track"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[2]searchForAlbumsByArtistName",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response includes album details (name, id, release_date)\",function(){\r",
+							"    const json=pm.response.json();\r",
+							"    pm.expect(json.albums.items[0]).to.have.property(\"name\");\r",
+							"    pm.expect(json.albums.items[0]).to.have.property(\"id\");\r",
+							"    pm.expect(json.albums.items[0]).to.have.property(\"release_date\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate album list is not empty\",function(){\r",
+							"    const json=pm.response.json();\r",
+							"    pm.expect(json.albums.items.length).to.be.above(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/search?q=Eminem&type=album",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "Eminem"
+						},
+						{
+							"key": "type",
+							"value": "album"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[3]Get Album Details by Album ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains 'album_type'\", function () {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('album_type');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains 'artists' array\", function () {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.artists).to.be.an('array').that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains 'tracks.items' array\", function () {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.tracks).to.have.property('items');\r",
+							"    pm.expect(jsonData.tracks.items).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains 'release_date'\", function () {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('release_date');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/albums/2cWBwpqMsDJC1ZUwz813lo",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"albums",
+						"2cWBwpqMsDJC1ZUwz813lo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[4]Get Track Details by Track ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response contains 'name'\", function () {\r",
+							"    pm.expect(jsonData).to.have.property('name');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response contains 'duration_ms'\", function () {\r",
+							"    pm.expect(jsonData).to.have.property('duration_ms');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response contains 'popularity'\", function () {\r",
+							"    pm.expect(jsonData).to.have.property('popularity');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response contains 'album'\", function () {\r",
+							"    pm.expect(jsonData).to.have.property('album');\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/tracks/11dFghVXANMlKmJXsNCbNl",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"tracks",
+						"11dFghVXANMlKmJXsNCbNl"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[5]Get Audio Features for a Track",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Deprecated"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/audio-features/11dFghVXANMlKmJXsNCbNl ",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"audio-features",
+						"11dFghVXANMlKmJXsNCbNl "
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[6]Get Audio Analysis for a Track",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Deprecated"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/audio-analysis/11dFghVXANMlKmJXsNCbNl",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"audio-analysis",
+						"11dFghVXANMlKmJXsNCbNl"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[7]Browse Categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"let jsonData;\r",
+							"try {\r",
+							"    jsonData = pm.response.json();\r",
+							"} catch (e) {\r",
+							"    pm.test(\"❌ Response is not valid JSON\", function () {\r",
+							"        throw new Error(\"Invalid JSON format\");\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response contains 'categories.items[]'\", function () {\r",
+							"    pm.expect(jsonData.categories).to.have.property('items');\r",
+							"    pm.expect(jsonData.categories.items).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"let categoryNames = jsonData.categories.items.map(item => item.name.toLowerCase());\r",
+							"\r",
+							"//  Validate that specific categories are present\r",
+							"[\"pop\", \"workout\", \"chill\"].forEach(expectedCategory => {\r",
+							"    pm.test(`Category '${expectedCategory}' is present`, function () {\r",
+							"        pm.expect(categoryNames).to.include(expectedCategory);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/browse/categories",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"browse",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[8]8. Get Playlists for a Category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Deprecated"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/browse/categories/dinner/playlists",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"browse",
+						"categories",
+						"dinner",
+						"playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[9]Get Featured Playlists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Deprecated"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/browse/featured-playlists",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"browse",
+						"featured-playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[10]Get New Releases",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response contains 'albums.items[]'\", function () {\r",
+							"    pm.expect(jsonData).to.have.nested.property('albums.items');\r",
+							"    pm.expect(jsonData.albums.items).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"const albums = jsonData.albums.items ;\r",
+							"pm.test(\"response includes name\", function () {\r",
+							"        pm.expect(albums[0]).to.have.property('name');\r",
+							"    });\r",
+							"\r",
+							"pm.test(\"response includes release_date\", function () {\r",
+							"        pm.expect(albums[0]).to.have.property('release_date');\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"response includes total_tracks\", function () {\r",
+							"        pm.expect(albums[0]).to.have.property('total_tracks');\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/browse/new-releases",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"browse",
+						"new-releases"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
